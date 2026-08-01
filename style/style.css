@@ -11,6 +11,10 @@ body {
   overflow-wrap: break-word;
 }
 
+.address {
+  word-break: break-all;
+}
+
 p {
   line-height: 1.6em; 
 }
