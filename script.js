@@ -17,6 +17,7 @@ let buttonsArray = [
 [ "https://klydz.net/assets/button_klydz.gif", "https://klydz.net", "klydz.net" ],
 [ "https://3kh0.net/button@2x.png", "https://3kh0.net/", "3kh0.net"],
 [ "https://socials.nicole4fox.de/88x31.gif", "https://blog.nicole4fox.de", "nicole4fox.de"],
+[ "https://m6.rs/88x31.gif", "https://m6.rs/", "m6.rs"],
 [ "https://girlboss.ceo/assets/buttons/june.png", "https://girlboss.ceo", "girlboss.ceo" ] ];
 
 let url = window.location.pathname;
