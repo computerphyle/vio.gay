@@ -10,6 +10,7 @@ let buttonsArray = [
 [ "images/88x31.png", "https://vio.gay", "vio.gay" ],
 [ "https://vmfunc.re/button.png", "https://vmfunc.re", "vmfunc.re" ],
 [ "https://img.sticks.ovh/shrimp_button", "https://sticks.ovh", "sticks.ovh" ],
+[ "https://iris.gay/images/88x31/eye.png", "https://iris.gay", "iris.gay" ],
 [ "https://kate.pet/button02.gif", "https://kate.pet", "kate.pet" ],
 [ "https://88x31.kate.pet/acab3.gif", "", "ACAB" ],
 [ "https://eva.ac/files/img/buttons/eva.ac-badge.png", "https://eva.ac", "eva.ac" ],
