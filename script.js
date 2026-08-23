@@ -35,7 +35,8 @@ if ( url.includes("posts/") ) {
 let headerHTML = '<ul> <li><a href="' + relativePath + '/index.html">home</a></li>' +
 '<li><a href="' + relativePath + '/archive.html">posts</a></li>' +
 '<li><a href="' + relativePath + '/about.html">about</a></li>' +
-'<li><a href="' + relativePath + '/art.html">art</a></li> </ul>';
+'<li><a href="' + relativePath + '/art.html">art</a></li>' +
+'<li><a href="https://shop.vio.gay/">shop</a></li> </ul>';
 
 let footerHTML = "<hr><p>written by <a href='" + authorLink + "'>" + authorName + "</a>. </p>";
 
