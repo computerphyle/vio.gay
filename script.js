@@ -9,6 +9,7 @@ let postsArray = [
 let buttonsArray = [
 [ "images/88x31.png", "https://vio.gay", "vio.gay" ],
 [ "https://vmfunc.re/button.png", "https://vmfunc.re", "vmfunc.re" ],
+[ "https://isawanangel.online/img/badges/aubrey8831.png", "https://isawanangel.online", "isawanangel.online" ],
 [ "https://img.sticks.ovh/shrimp_button", "https://sticks.ovh", "sticks.ovh" ],
 [ "https://iris.gay/images/88x31/eye.png", "https://iris.gay", "iris.gay" ],
 [ "https://lucid.gay/lucid_88x31.png", "https://lucid.gay", "lucid.gay" ],
