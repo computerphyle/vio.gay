@@ -1,19 +1,22 @@
-/* CSS is how you can add style to your website, such as colors, fonts, and positioning of your
-   HTML content. To learn how to do something, just try searching Google for questions like
-   "how to change link color." */
+
 
 body {
   background-color: black;
-	background-position: top;
-	background-repeat: repeat-x;
-	background-attachment: fixed;
+  background-position: top;
+  background-repeat: repeat-x;
+  background-attachment: fixed;
   font-size: 18px;
   font-family: "Courier New", Courier, monospace;
   margin: 0;
+  overflow-wrap: break-word;
+}
+
+.address {
+  word-break: break-all;
 }
 
 p {
-  line-height: 1.6em; /*I find the default HTML line-height tends to be a bit claustrophobic for main text*/
+  line-height: 1.6em; 
 }
 
 img {
@@ -51,8 +54,39 @@ img {
 a {
   color: #ffc000;
 }
-a:hover { 
+a:hover {
   background-color: #34220b;
+}
+
+code {
+  background-color: #1a1530;
+  color: #ffc000;
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.95em;
+  word-break: break-word;
+}
+pre {
+  background-color: #120f22;
+  border: 1px dashed #9D8AC0;
+  border-radius: 4px;
+  padding: 0.8em 1em;
+  overflow-x: auto;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  line-height: 1.4em;
+}
+pre code {
+  background-color: transparent;
+  color: #C3B1E1;
+  padding: 0;
+  border-radius: 0;
+  font-size: 0.9em;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
 }
 
 h1, h2, h3, h4, h5 {
@@ -65,7 +99,6 @@ hr {
   border-color: #9D8AC0; 
 }
 
-/*#CONTAINER is the rectangle that has contains everything but the background!*/
 #container {
   margin: 3em auto;
   width: 90%;
@@ -122,7 +155,6 @@ hr {
   color: black;
 }
 
-/*POST LIST STYLE*/
 #postlistdiv ul {
   font-size: 1.2em;
   padding: 0;
@@ -138,7 +170,6 @@ hr {
   margin-top: 0.2em;
 }
 
-/*NEXT AND PREVIOUS LINKS STYLE*/
 #nextprev {
   text-align: center;
   margin-top: 1.4em;

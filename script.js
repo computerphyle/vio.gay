@@ -4,17 +4,25 @@ let authorLink = "https://twitter.com/computerphile";
 
 let postsArray = [
 //[ "posts/template.html" ],
-[ "posts/guide-to-hacking-and-opsec.html" ] ];
+[ "posts/prisoner-commercialization.html", "Prisoner Commercialization: Discovering, Decompiling, and Analyzing Prison Kiosk Software" ],
+[ "posts/guide-to-hacking-and-opsec.html", "guide to hacking and opsec, from a former blackhat hacker" ] ];
 // [ image, link, alt text ]
 let buttonsArray = [
 [ "images/88x31.png", "https://vio.gay", "vio.gay" ],
 [ "https://vmfunc.re/button.png", "https://vmfunc.re", "vmfunc.re" ],
+[ "https://poser.gay/88x31.gif", "https://poser.gay", "poser.gay" ],
+[ "https://isawanangel.online/img/badges/aubrey8831.png", "https://isawanangel.online", "isawanangel.online" ],
 [ "https://img.sticks.ovh/shrimp_button", "https://sticks.ovh", "sticks.ovh" ],
+[ "https://iris.gay/images/88x31/eye.png", "https://iris.gay", "iris.gay" ],
+[ "https://lucid.gay/lucid_88x31.png", "https://lucid.gay", "lucid.gay" ],
 [ "https://kate.pet/button02.gif", "https://kate.pet", "kate.pet" ],
 [ "https://88x31.kate.pet/acab3.gif", "", "ACAB" ],
 [ "https://eva.ac/files/img/buttons/eva.ac-badge.png", "https://eva.ac", "eva.ac" ],
 [ "https://maia.crimew.gay/badges/maia.crimew.gay.png", "https://maia.crimew.gay", "maia.crimew.gay" ],
 [ "https://klydz.net/assets/button_klydz.gif", "https://klydz.net", "klydz.net" ],
+[ "https://3kh0.net/button@2x.png", "https://3kh0.net/", "3kh0.net"],
+[ "https://socials.nicole4fox.de/88x31.gif", "https://blog.nicole4fox.de", "nicole4fox.de"],
+[ "https://m6.rs/88x31.gif", "https://m6.rs/", "m6.rs"],
 [ "https://girlboss.ceo/assets/buttons/june.png", "https://girlboss.ceo", "girlboss.ceo" ] ];
 
 let url = window.location.pathname;
@@ -30,7 +38,8 @@ if ( url.includes("posts/") ) {
 let headerHTML = '<ul> <li><a href="' + relativePath + '/index.html">home</a></li>' +
 '<li><a href="' + relativePath + '/archive.html">posts</a></li>' +
 '<li><a href="' + relativePath + '/about.html">about</a></li>' +
-'<li><a href="' + relativePath + '/art.html">art</a></li> </ul>';
+'<li><a href="' + relativePath + '/art.html">art</a></li>' +
+'<li><a href="https://shop.vio.gay/">shop</a></li> </ul>';
 
 let footerHTML = "<hr><p>written by <a href='" + authorLink + "'>" + authorName + "</a>. </p>";
 
