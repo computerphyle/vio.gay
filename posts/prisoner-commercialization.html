@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Prisoner Commercialization: Discovering, Decompiling, and Analyzing Prison Kiosk Software</title>
+    <link rel="icon" href="..../images/favicon.png" type="image/x-icon"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <link href="../style/style.css?v=3.7" rel="stylesheet" type="text/css" media="all">
+  </head>
+  <body>
+    <div id="container">
+    <div id="header">...</div>
+    <div id="content">
+      <h1 id="postTitleH1"></h1>
+
+      <p><em>NOTE: all findings and research are conducted legally; no exploits were used, no unauthorized access, and no DMCA circumvention.</em></p>
+
+      <p>a common issue brought up by prison abolitionists is the commercialization of victims of the prison industrial complex, whether this be the inmates themselves, or the families on the outside. the prisoners are subjected to work for less than a dollar per hour, the families are subjected to pay for hygiene, food, clothes, and more via commissary, and pay-to-stay practices - merely charging the inmate for <em>existing</em> in the cage.</p>
+
+      <p>these commercialization practices often force the inmates and their families into poverty. once in poverty, the victims of these practices lack education, healthcare, employment opportunities, and basic needs being met. this leads to resorting to crime for the ability to support themselves and drugs to cope with and manage untreated trauma and ailments.</p>
+
+      <p>deconstructing the systems creating and enabling this will be a long and difficult process, however it can help to understand these oppressive practices by using any means, any skills we have. in this case, i will be showing how i discovered a cache of internal files, how i decompiled them and analyzed them, and how it shows a different angle of the commercialization of prisoners. im using simple methodology and details, to show that you do not need to be on the "advanced persistent threat" level to use your technical skills for good, to show its far more simple than you might know, and to encourage you to try your own attempts to understand and combat the systems furthering our oppression.</p>
+
+      <hr>
+
+      <h2>Discovery</h2>
+
+      <p>before you can even look through a target, you need to actually find a target. i start by deciding on an industry i want to look at (in this case, correctional communication services), then search for any companies, products, and solutions provided for that industry.</p>
+
+      <p><em>JailATM is an online service that lets friends and family members deposit money, send messages, and buy commissary or gift packs for incarcerated individuals.</em></p>
+
+      <p>looking through their website (jailatm.com) and prodding at it, i didnt find anything immediately interesting, so i moved to the parent company, <a href=https://mytechfriends.com>Tech Friends Inc</a>. doing a quick and easy google dork: <code>site:*.mytechfriends.com</code>, i found a cached url for the release notes of their Lockdown software and JailATM website.</p>
+
+      <p>removing the filename to just load the directory showed its publicly open, hooray!<br>
+      <code>/lockdown/</code> was completely publicly accessible, and contained copies of software, staff support files and instructions, and other files.</p>
+
+      <p><img src="../images/pc-1.png" alt="directory structure" class="center small"><img src="../images/pc-1-2.png" alt="WIBondAgencies.txt with phone numbers censored" class="center small"></p>
+      <p class="caption">WIBondAgencies.txt &amp; directory structure</p>
+
+      <hr>
+
+      <h2>Decompilation, Analysis</h2>
+
+      <p><em>The Programs (which include both the software and documentation) contain proprietary information; they are provided under a license agreement containing restrictions on use and disclosure and are also protected by copyright, patent, and other intellectual and industrial property laws. Reverse engineering, disassembly, or decompilation of the Programs, except to the extent required to obtain interoperability with other independently created software or as specified by law, is prohibited.</em></p>
+
+      <p>this statement from a document found in the open directory is typical legal wording. thankfully, i have not entered a contractual agreement with them to abide by their terms, and reverse engineering for analysis/fair use without exploitation is completely legal!</p>
+
+      <p>looking through surface level, i instantly find credentials sitting in documents on their <code>Support-711</code> directory.</p>
+
+      <p><img src="../images/pc-2.png" alt="document with passwords censored" class="center small"></p>
+      <p class="caption">document (passwords censored)</p>
+
+      <p>but lets move to the directory <code>JailATMV10.0.0.2</code>.</p>
+
+      <p>there are some asset files (<code>*.wav</code>, <code>*.rtf</code>), some ui/ux dlls (<code>Infragistics*</code>), dlls used for handling certain filetypes, and of course, the main <code>JailATM.exe</code>, <code>libJailATM.dll</code>, and <code>clDatabase.dll</code>. to check if its .NET assembly or native pe:</p>
+
+      <pre><code>[vio@meowermachine JailATMV10.0.0.2]$ file JailATM.exe
+JailATM.exe: PE32 executable for MS Windows 4.00 (GUI), Intel i386 Mono/.Net assembly, 4 sections</code></pre>
+
+      <p>perfect, .NET assemblies are far easier to decompile using dnSpy or ILSpy.</p>
+
+      <p><img src="../images/pc-3.png" alt="JailATM loaded in ILSpy" class="center small"></p>
+      <p class="caption">JailATM loaded in ILSpy</p>
+
+      <p>from here, we look around for interesting things :3 api endpoints, hardcoded secrets, interesting functions.</p>
+
+      <h3>finding 1: security issues</h3>
+
+      <p>among the worst of the issues found are the blatant hardcoded secrets littered around the software. to avoid any liability i am replacing every secret with REDACTED.</p>
+
+      <h4>proxy/db encryption key</h4>
+      <p><code>libJailATM/JailATM/SiteOptions.cs</code></p>
+      <pre><code>public string ProxyPassword
+{
+	get
+	{
+		string settingDB = GlobalSettings.SiteRegistry.GetSettingDB("ProxyPass", "", GlobalSettings.SiteDatabase);
+		if (settingDB.Trim().Length > 0)
+		{
+			return Encryption.Decrypt(settingDB, "REDACTED");
+		}
+		return "";
+	}
+	set
+	{
+		string sValue = Encryption.Encrypt(value, "REDACTED");
+		GlobalSettings.SiteRegistry.SaveSettingDB("ProxyPass", sValue, 0L, 0L, 0L, bSiteWideSetting: true, bAllUsersSetting: true, GlobalSettings.SiteDatabase);
+	}
+}</code></pre>
+
+      <h4>SQL server hardcoded credentials</h4>
+      <p><code>clDatabase/clDatabase/tfDatabase.cs</code><br>
+      <code>clDatabase/clDatabase/ucSiteDatabase.cs</code><br>
+      <code>libJailATM/JailATM/StationConfig.cs</code><br>
+      <code>libJailATM/JailATM/SiteOptions.cs</code></p>
+
+      <p>one of the secrets here is a database decryption password:</p>
+      <pre><code>public void DBFind()
+{
+	try
+	{
+		FileInfo fileInfo = new FileInfo(ConfigFilename);
+		if (fileInfo.get_Exists())
+		{
+			FileStream fileStream = new FileStream(ConfigFilename, FileMode.Open, FileAccess.Read);
+			StreamReader streamReader = new StreamReader(fileStream);
+			string text = streamReader.ReadLine();
+			_SharedFolder = streamReader.ReadLine();
+			_ServerName = streamReader.ReadLine();
+			if (Conversions.ToInteger(text) > 1)
+			{
+				_ServerSharedFolder = streamReader.ReadLine();
+			}
+			else
+			{
+				_ServerSharedFolder = _SharedFolder;
+			}
+			if (Conversions.ToInteger(text) > 2)
+			{
+				streamReader.ReadLine();
+			}
+			if (Conversions.ToInteger(text) > 3)
+			{
+				_SQLServerInstanceName = streamReader.ReadLine();
+				string text2 = streamReader.ReadLine();
+				if (text2.Trim().Length > 0)
+				{
+					_SQLServerPassword = Encryption.Decrypt(text2, "REDACTED");
+				}
+			}</code></pre>
+
+      <p>and the next is the actual database credentials:</p>
+      <pre><code>public StationConfig()
+{
+	_ServerSharedFolder = "";
+	_SQLServerInstanceName = "TECHFRIEND";
+	_SQLServerPassword = "REDACTED";
+	_SQLServerPassword2 = "REDACTED";
+	_SharedFolder = "C:\\ATM";
+	_ServerName = Environment.MachineName;</code></pre>
+
+      <h4>hardcoded db backup password</h4>
+      <p><code>libJailATM/JailATM/Site.cs</code></p>
+      <pre><code>public static string BackupPassword => "REDACTED";</code></pre>
+
+      <p>it appears this is a backup password, called in several locations likely to encrypt the backup files.</p>
+
+      <h4>hardcoded ad/log credentials</h4>
+      <p><code>libJailATM/JailATM/TransferThreadWrapper.cs</code></p>
+      <pre><code>public TransferThreadWrapper(string SiteCode)
+{
+	_SitePassword = "REDACTED";
+	_WarehouseCode = "ATM";
+	_WarehousePassword = "REDACTED";
+	_WSEndpoint = "http://www.jailatm.com/FileTransferMgmtWS.asmx";
+	_Folder = "C:\\ATM";
+	_SiteCode = SiteCode;
+}</code></pre>
+
+      <h4>hardcoded transaction service key</h4>
+      <p><code>JailATM/appJailATM/Form1.cs</code></p>
+      <pre><code>private const string SecurityToken = "REDACTED";</code></pre>
+
+      <h4>hardcoded internal smb share credentials</h4>
+      <p><code>JailATM/appJailATM/Form1.cs</code></p>
+      <pre><code>try
+{
+	Interaction.Shell("net use o: \\\\10.170.4.162\\vol3 /user:dfjims REDACTED /persistent:no", (AppWinStyle)2, false, -1);
+}</code></pre>
+
+      <p>more sloppy development...</p>
+
+      <h4>API endpoints</h4>
+      <p>not necessarily a security issue in itself, however i wanted to include it for documentation purposes.</p>
+      <pre><code>API endpoints:
+https://jailatm.com/FileTransferMgmtWS/GetFile
+https://jailatm.com/FileTransferMgmtWS/UploadFile
+https://jailatm.com/FileTransferMgmtWS/DeleteCustomerFile
+https://jailatm.com/FileTransferMgmtWS/GetLastUpgradeDate
+https://jailatm.com/FileTransferMgmtWS/UpdateCustomerSite
+https://jailatm.com/FileTransferMgmtWS/ReceiveCustomerFileList
+https://deposits.jailatm.com/Services/SoftwareUpdateService.svc/wsdl
+https://deposits.jailatm.com/Services/SoftwareUpdateService.svc</code></pre>
+
+      <h3>finding 2: undisclosed high fees for small deposits</h3>
+
+      <p>while looking through the code, i noticed in <code>libJailATM/JailATM/Misc.cs</code> that for small deposits, there can be up to 50% increase in cost.</p>
+
+      <pre><code>public static int CalculateGiftCardFee(int GiftAmount)
+{
+	checked
+	{
+		int num;
+		if (GlobalSettings.SiteOptions.TieredCCFee)
+		{
+			num = ((GiftAmount < 2001) ? ((int)Math.Round((double)GiftAmount * 0.035 + 500.0)) : ((GiftAmount >= 10001) ? ((int)Math.Round((double)GiftAmount * 0.035 + 700.0)) : ((int)Math.Round((double)GiftAmount * 0.035 + 600.0))));
+		}
+		else
+		{
+			int num2 = Conversions.ToInteger(RemoteDB.DBLoadRegistryKeyByName("CreditCardMinimum").Value);
+			decimal d = Conversions.ToDecimal(RemoteDB.DBLoadRegistryKeyByName("CreditCardPercent").Value);
+			num = (int)Math.Round(modMisc.MoneyRounding(Convert.ToDouble(decimal.Multiply(new decimal(GiftAmount), d))));
+			if ((num < num2 && GiftAmount > 0) ? true : false)
+			{
+				num = num2;
+			}
+			else if (GiftAmount == 0)
+			{
+				num = 0;
+			}
+		}
+		return num;
+	}
+}</code></pre>
+
+      <p>theres a default 3.5% processing charge, along with an additional $5 flat fee. so if you deposit the minimum $1, its not just $1.04 - its $6.04. for $1 of credits. in <code>libJailATM/JailATM/Misc.cs</code>, there is a credit fee notice:</p>
+
+      <pre><code>public static string CreditFeeNotice()
+{
+	return "Electronic gift cards deposited into the inmate's account can be purchased using your credit card.  Once deposited, the inmate can spend the money just like cash.\r\n\r\nThere is a non-refundable 12.5% handling fee for each gift card purchased.";
+}</code></pre>
+
+      <p>as you can see, it says a 12.5% non-refundable fee. not only is this false as the fee is $5 flat and 3.5% percentage, but <code>CreditFeeNotice()</code> is not called anywhere in the software.</p>
+
+      <p>often, the people depositing small amounts are the people in the most poverty, they cant afford the financially better choice to deposit more at once to avoid repeated fees. this price gouging is not surprising to many of you, its one of the many ways the prison industrial complex capitalizes on families at their worst.</p>
+
+      <h3>finding 3: yet more commercialization, embedded advertisements</h3>
+
+      <p>honestly i'm not even surprised that they are advertising on a machine that families use when they find out their loved one is arrested.</p>
+
+      <p><code>libJailATM/JailATM/Advertisement.cs</code></p>
+      <pre><code>case AdType.Banner:
+	text = Path.Combine(GlobalSettings.SiteOptions.ATMCommunicationFolder, "BannerAds");
+	text2 = GlobalSettings.SiteOptions.ATMLastBannerAd;
+	break;
+case AdType.Premium:
+	text = Path.Combine(GlobalSettings.SiteOptions.ATMCommunicationFolder, "PremiumAds");
+	text2 = GlobalSettings.SiteOptions.ATMLastPremiumAd;
+	break;</code></pre>
+
+      <p>here we can clearly see they have two tiers of advertisements, banners and premium.</p>
+
+      <p><code>JailATM/appJailATM/Form1.cs</code></p>
+      <pre><code>private void lblAttorneyList_Click(object sender, EventArgs e)
+{
+	//IL_0021: Unknown result type (might be due to invalid IL or missing references)
+	try
+	{
+		frmAdvertiserList frmAdvertiserList2 = new frmAdvertiserList();
+		frmAdvertiserList2.Advertisers = Advertisement.LoadAdvertiserList("lawyers.txt");
+		_SubScreenActive = true;
+		((Form)frmAdvertiserList2).ShowDialog();
+		_SubScreenActive = false;
+	}
+	catch (Exception ex)
+	{
+		ProjectData.SetProjectError(ex);
+		Exception ex2 = ex;
+		ProjectData.ClearProjectError();
+	}
+}
+
+private void lblBailBondList_Click(object sender, EventArgs e)
+{
+	//IL_0021: Unknown result type (might be due to invalid IL or missing references)
+	try
+	{
+		frmAdvertiserList frmAdvertiserList2 = new frmAdvertiserList();
+		frmAdvertiserList2.Advertisers = Advertisement.LoadAdvertiserList("bailbonds.txt");
+		_SubScreenActive = true;
+		((Form)frmAdvertiserList2).ShowDialog();
+		_SubScreenActive = false;
+	}
+	catch (Exception ex)
+	{
+		ProjectData.SetProjectError(ex);
+		Exception ex2 = ex;
+		ProjectData.ClearProjectError();
+	}
+}</code></pre>
+
+      <p>so it seems lawyers and bail bond companies are paying for advertisement space on these kiosks. the files <code>bailbonds.txt</code> and <code>lawyers.txt</code> are retrieved remotely from the ad/log server (which leaks its hardcoded credentials).</p>
+
+      <h2>Conclusion</h2>
+
+      <p>this post was intended to show you all how easy it can be to leak secrets of a target and along the way, show the disgusting practices to pull every dollar from prisoners and their families. changing this is not easy. prison reformation is less effective because the policies governing prisons are also influenced by money, the most thorough way to ensure we dont repeat this process is to abolish it and rebuild it from the roots - this isnt exclusively about the prison industrial complex but governments and capitalist extraction too.</p>
+
+      <p>there are many things to be done to try to invoke change; traditional protesting and boycotting, artistic expressions of resistance, hacktivism and technical analysis of their tools, and of course, nurturing our own community.</p>
+
+      <p>my previous work in <a href="https://en.wikipedia.org/wiki/SiegedSec">SiegedSec a/k/a gay furry hackers</a> was intended to inspire others to follow our footsteps in hacktivism. while i believe i was too reckless back then, i aim to continue activism and using my technical skills to help inspire others.</p>
+
+      <p>if you have any questions, comments, concerns, feel free to <a href="../about.html">contact me</a></p>
+
+      <p>if you'd like to donate to support what i do:<br>
+      Bitcoin: <span class="address">17iTRvVkB41gmdGqqN3jPmgmXaVQncmrQr</span><br>
+      Monero: <span class="address">44cNDKG2mqp3RfQuohA34hM77s83VH2XjLo8LcSAnoi7WCHPz9wABnKeYnj6cyzQwy7e9NmVu17uq7c5EFfAdrztR7S96Gh</span><br>
+      other ways: <a href="../about.html">contact me</a></p>
+
+    <div id="nextprev"></div>
+    </div> <!-- end of div id="content" -->
+    <div id="footer"></div>
+    </div> <!-- end of div id="container" -->
+  <!-- Here's the link to our JavaScript! -->
+  <script src="../script.js?v=3.7"></script>
+  </body>
+</html>
