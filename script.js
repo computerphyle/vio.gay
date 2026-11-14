@@ -17,6 +17,7 @@ let buttonsArray = [
 [ "https://lucid.gay/lucid_88x31.png", "https://lucid.gay", "lucid.gay" ],
 [ "https://kate.pet/button02.gif", "https://kate.pet", "kate.pet" ],
 [ "https://88x31.kate.pet/acab3.gif", "", "ACAB" ],
+[ "https://minoa.cat/assets/images/buttons/minoa_88x31.png", "https://minoa.cat", "minoa.cat" ],
 [ "https://eva.ac/files/img/buttons/eva.ac-badge.png", "https://eva.ac", "eva.ac" ],
 [ "https://maia.crimew.gay/badges/maia.crimew.gay.png", "https://maia.crimew.gay", "maia.crimew.gay" ],
 [ "https://klydz.net/assets/button_klydz.gif", "https://klydz.net", "klydz.net" ],
